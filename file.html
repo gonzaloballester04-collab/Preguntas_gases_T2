@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test - Gases y Partículas</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+    padding: 20px 24px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  }
+  header h1 { font-size: 1.5rem; font-weight: 700; }
+  header p  { font-size: .9rem; opacity: .85; margin-top: 4px; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 24px 16px; max-width: 800px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── HOME ── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .mode-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .mode-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 20px rgba(37,99,235,.15);
+    transform: translateY(-2px);
+  }
+  .mode-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .mode-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .mode-card p  { font-size: .85rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .question-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+  .badge-blue  { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-red   { background: #fee2e2; color: #b91c1c; }
+  .badge-amber { background: #fef3c7; color: #b45309; }
+
+  .question-text {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1.5;
+    font-size: .95rem;
+    background: #fafafa;
+  }
+  .option:hover:not(.disabled) { border-color: var(--primary); background: #eff6ff; }
+  .option.correct  { border-color: var(--success); background: #f0fdf4; }
+  .option.wrong    { border-color: var(--danger);  background: #fef2f2; }
+  .option.disabled { cursor: default; }
+  .option-letter {
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+  .option.correct .option-letter { color: var(--success); }
+  .option.wrong   .option-letter { color: var(--danger);  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .82rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #06b6d4);
+    border-radius: 999px;
+    transition: width .4s ease;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-primary  { background: var(--primary); color: white; }
+  .btn-primary:hover  { background: var(--primary-dark); }
+  .btn-success  { background: var(--success); color: white; }
+  .btn-success:hover  { background: #15803d; }
+  .btn-danger   { background: var(--danger); color: white; }
+  .btn-outline  { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+  .btn-outline:hover { background: #eff6ff; }
+  .btn-gray     { background: #e2e8f0; color: var(--text); }
+  .btn-gray:hover { background: #cbd5e1; }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ── FEEDBACK ── */
+  .feedback-box {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: .9rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-correct { background: #f0fdf4; border-left: 4px solid var(--success); color: #15803d; }
+  .feedback-wrong   { background: #fef2f2; border-left: 4px solid var(--danger);  color: #b91c1c; }
+
+  /* ── RESULTS ── */
+  .results-header {
+    text-align: center;
+    padding: 24px;
+    background: var(--card);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+  .score-pass { background: #dcfce7; color: #15803d; border: 4px solid #16a34a; }
+  .score-fail { background: #fee2e2; color: #b91c1c; border: 4px solid #dc2626; }
+  .score-mid  { background: #fef3c7; color: #b45309; border: 4px solid #d97706; }
+
+  .results-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.6rem; font-weight: 800; }
+  .stat-lbl { font-size: .8rem; color: var(--text-muted); }
+
+  .failed-list { display: flex; flex-direction: column; gap: 16px; }
+  .failed-item {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px;
+    border-left: 4px solid var(--danger);
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  .failed-item h4 { font-size: .9rem; margin-bottom: 10px; line-height: 1.5; }
+  .correct-answer {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #f0fdf4;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: .88rem;
+    color: #15803d;
+  }
+  .correct-answer .icon { flex-shrink: 0; }
+
+  /* ── SEARCH ── */
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: .95rem;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--primary); }
+
+  .search-result {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  .search-result h4 { font-size: .95rem; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+  .search-option { font-size: .88rem; padding: 6px 8px; border-radius: 6px; }
+  .search-option.is-correct { background: #f0fdf4; color: #15803d; font-weight: 600; }
+  .search-no-results { text-align: center; color: var(--text-muted); padding: 40px 0; }
+
+  /* ── QUEUE INFO ── */
+  .queue-info {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  @media (max-width: 480px) {
+    .btn { padding: 9px 14px; font-size: .88rem; }
+    .question-text { font-size: .95rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎓 Test: Gases y Emisiones</h1>
+  <p>Tratamiento y control de efluentes gaseosos</p>
+</header>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div style="text-align:center; padding: 16px 0 8px;">
+    <p style="color: var(--text-muted); font-size:.95rem;">Selecciona el modo de práctica</p>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startExam()">
+      <div class="icon">📝</div>
+      <h2>Simulacro de Examen</h2>
+      <p>25 preguntas aleatorias. Al finalizar verás las falladas con su respuesta correcta.</p>
+    </div>
+    <div class="mode-card" onclick="startPractice()">
+      <div class="icon">🔄</div>
+      <h2>Repaso Completo</h2>
+      <p>Todas las preguntas. Las acertadas salen de la cola; las falladas vuelven. Acaba al acertar todas.</p>
+    </div>
+    <div class="mode-card" onclick="showSearch()">
+      <div class="icon">🔍</div>
+      <h2>Búsqueda</h2>
+      <p>Busca preguntas por palabras clave y consulta la respuesta correcta al instante.</p>
+    </div>
+  </div>
+  <div style="margin-top:24px; background:var(--card); border-radius:var(--radius); padding:16px; font-size:.85rem; color:var(--text-muted); text-align:center; border: 1px solid var(--border);">
+    📚 Batería de <strong>123 preguntas</strong> sobre control de emisiones gaseosas
+  </div>
+</div>
+
+<!-- EXAM -->
+<div id="screen-exam" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="exam-progress-label">Pregunta 1 de 25</span>
+      <span id="exam-score-label">✅ 0 | ❌ 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="exam-progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-meta">
+      <span class="badge badge-blue" id="exam-q-num">Pregunta 1</span>
+      <span class="badge badge-amber">Simulacro</span>
+    </div>
+    <div class="question-text" id="exam-question-text"></div>
+    <div class="options" id="exam-options"></div>
+    <div class="feedback-box" id="exam-feedback"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gray" onclick="goHome()">🏠 Salir</button>
+    <button class="btn btn-primary" id="exam-next-btn" onclick="examNext()" style="display:none">Siguiente →</button>
+    <button class="btn btn-success" id="exam-finish-btn" onclick="showExamResults()" style="display:none">Ver resultados 🏁</button>
+  </div>
+</div>
+
+<!-- EXAM RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="results-header">
+    <div class="score-circle" id="result-circle"></div>
+    <h2 id="result-title" style="font-size:1.2rem; margin-bottom:8px;"></h2>
+    <div class="results-stats">
+      <div class="stat"><div class="stat-num" id="stat-correct" style="color:var(--success)"></div><div class="stat-lbl">Correctas</div></div>
+      <div class="stat"><div class="stat-num" id="stat-wrong" style="color:var(--danger)"></div><div class="stat-lbl">Falladas</div></div>
+      <div class="stat"><div class="stat-num" id="stat-pct"></div><div class="stat-lbl">Nota</div></div>
+    </div>
+  </div>
+
+  <div id="failed-section">
+    <div class="section-title">❌ Preguntas falladas</div>
+    <div class="failed-list" id="failed-list"></div>
+  </div>
+  <div class="btn-row" style="margin-top:20px;">
+    <button class="btn btn-gray" onclick="goHome()">🏠 Inicio</button>
+    <button class="btn btn-primary" onclick="startExam()">🔁 Otro simulacro</button>
+  </div>
+</div>
+
+<!-- PRACTICE -->
+<div id="screen-practice" class="screen">
+  <div class="queue-info">
+    <span class="badge badge-blue" id="practice-queue-badge">En cola: 123</span>
+    <span class="badge badge-green" id="practice-done-badge">Superadas: 0</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="practice-progress-label">Progreso</span>
+      <span id="practice-pct-label">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="practice-progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="question-card">
+    <div class="question-meta">
+      <span class="badge badge-blue" id="practice-q-num">Pregunta</span>
+      <span class="badge badge-green">Repaso</span>
+    </div>
+    <div class="question-text" id="practice-question-text"></div>
+    <div class="options" id="practice-options"></div>
+    <div class="feedback-box" id="practice-feedback"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gray" onclick="goHome()">🏠 Salir</button>
+    <button class="btn btn-primary" id="practice-next-btn" onclick="practiceNext()" style="display:none">Siguiente →</button>
+  </div>
+</div>
+
+<!-- PRACTICE COMPLETE -->
+<div id="screen-practice-done" class="screen">
+  <div style="text-align:center; padding:40px 20px;">
+    <div style="font-size:4rem; margin-bottom:16px;">🎉</div>
+    <h2 style="font-size:1.5rem; margin-bottom:8px;">¡Repaso completado!</h2>
+    <p style="color:var(--text-muted); margin-bottom:24px;">Has acertado todas las preguntas de la batería al menos una vez.</p>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-gray" onclick="goHome()">🏠 Inicio</button>
+      <button class="btn btn-primary" onclick="startPractice()">🔄 Repetir repaso</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div id="screen-search" class="screen">
+  <div class="section-title">🔍 Búsqueda de preguntas</div>
+  <div class="search-box">
+    <input type="text" class="search-input" id="search-input" placeholder="Escribe palabras clave (ej: ciclón, NOx, adsorción...)" oninput="doSearch()">
+    <button class="btn btn-primary" onclick="doSearch()">Buscar</button>
+  </div>
+  <div id="search-results"></div>
+  <div class="btn-row"><button class="btn btn-gray" onclick="goHome()">🏠 Inicio</button></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  BANK OF QUESTIONS
+//  correct: index (0-based) of the correct option
+// ═══════════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    id: 1,
+    text: "Las formas de prevenir las emisiones fugitivas de partículas en un silo de almacenamiento de carbón son:",
+    options: ["Limitar la altura del almacenamiento","Humectar el carbón","Construir pantallas alrededor del perímetro del almacenamiento","Todas las respuestas son correctas","Emplear silos cerrados"],
+    correct: 3
+  },
+  {
+    id: 2,
+    text: "El rendimiento de una cámara de gravedad se incrementa con:",
+    options: ["La viscosidad, la longitud de la cámara y la densidad de las partículas","La altura de la cámara, el diámetro de las partículas y la densidad de las partículas","La longitud de la cámara, el diámetro de las partículas y la densidad de la corriente gaseosa","La longitud de la cámara, la velocidad de movimiento horizontal y la densidad de las partículas","La longitud de la cámara, el diámetro de las partículas y la densidad de las partículas"],
+    correct: 4
+  },
+  {
+    id: 3,
+    text: "Aproximadamente ¿qué porcentaje de las emisiones de CO₂ antropogénicas se capturan y almacenan en la actualidad?",
+    options: ["25%","15%","1,5%","0,15%","Ninguna de las otras respuestas es correcta"],
+    correct: 3
+  },
+  {
+    id: 4,
+    text: "Una medida preventiva para reducir las emisiones de CO₂ en las calderas domésticas es:",
+    options: ["Implementar sistemas de captura y almacenamiento de CO₂","El uso de combustibles con menores PCI","Implementar un diseño de edificios que requiera menores consumos energéticos","Implementar filtros de mangas o ciclones, en función del tamaño de las partículas","Aumentar la altura de la chimenea"],
+    correct: 2
+  },
+  {
+    id: 5,
+    text: "¿Bajo qué situación atmosférica se formará típicamente un penacho tubular?",
+    options: ["Intensa turbulencia convectiva","Inestabilidad","Atmósfera neutra","Estabilidad","Ausencia de viento"],
+    correct: 3
+  },
+  {
+    id: 6,
+    text: "La mejor opción para tratar una corriente gaseosa con partículas de tamaño aerodinámico medio de 8 μm y una humedad relativa muy elevada es:",
+    options: ["Filtro de mangas o lavador","Lavador o electrofiltro","Filtro de mangas o electrofiltro","Cámara de gravedad o ciclón","Filtro de mangas o ciclón"],
+    correct: 1
+  },
+  {
+    id: 7,
+    text: "En términos generales ¿qué instalaciones pueden asumir costes de inversión más altos para los sistemas de tratamiento de sus efluentes gaseosos?",
+    options: ["Grandes instalaciones que tienen que primar los costes de operación","Instalaciones que tienen un número de horas de funcionamiento muy reducido","Aquellas en las que la corriente a tratar tiene un caudal muy reducido","Aquellas sujetas a límites de emisión más estrictos","Pequeñas instalaciones que tienen que minimizar los costes fijos"],
+    correct: 3
+  },
+  {
+    id: 8,
+    text: "Las emisiones de CO₂-equivalente de un coche eléctrico, considerando el ciclo de vida completo:",
+    options: ["Actualmente son del orden de la mitad de las correspondientes a un vehículo análogo con motor de combustión interna","Todas las respuestas son correctas","Como media en Europa son del orden de 130 g/km en 2020","Incluyen las emisiones de todos los gases de efecto invernadero producidos en la generación de la electricidad","Incluyen las emisiones producidas en la fabricación y fin de vida del vehículo"],
+    correct: 1
+  },
+  {
+    id: 9,
+    text: "Si el diámetro de corte de un ciclón es 7 μm, el rendimiento del ciclón para separar ese tipo de partículas será:",
+    options: ["50%","Menor del 50%","Mayor del 50%","33,3%","100%"],
+    correct: 0
+  },
+  {
+    id: 10,
+    text: "Las isotermas de adsorción:",
+    options: ["Indican la concentración de adsorbato en el líquido pulverizado","Para un mismo adsorbente y adsorbato son independientes de la temperatura, como su propio nombre indica","Indican la temperatura de condensación del compuesto más volátil en la corriente","Unen puntos de igual temperatura dentro del lecho de carbón activo","Relacionan la cantidad de adsorbato retenida por unidad de masa de adsorbente con la concentración del adsorbato en los gases"],
+    correct: 4
+  },
+  {
+    id: 11,
+    text: "¿Por qué el uso de precipitadores electrostáticos está tan extendido en grandes instalaciones de combustión?",
+    options: ["Porque en instalaciones de gran tamaño es esencial minimizar los costes de operación","Por su alta eficiencia en la eliminación de partículas de diámetro menor a 1 micra","Por la capacidad de este tipo de instalaciones de amortizar altos costes de inversión","Todas las respuestas son correctas","Por su capacidad de tratar gases a alta temperatura"],
+    correct: 3
+  },
+  {
+    id: 12,
+    text: "Un filtro de mangas frente a un electrofiltro:",
+    options: ["No permite depurar las partículas con una resistividad muy elevada","Tiene mayor dependencia del gas a depurar","Es más seguro ante el riesgo de incendios pero menos ante explosiones","Tiene mayores pérdidas de carga","Tiene menores pérdidas de carga"],
+    correct: 3
+  },
+  {
+    id: 13,
+    text: "¿Cuál de los siguientes sistemas no es viable para eliminar partículas líquidas en una corriente gaseosa?",
+    options: ["Electrofiltro","Separador inercial","Lavador","Ciclón","Filtro de mangas"],
+    correct: 4
+  },
+  {
+    id: 14,
+    text: "¿Cuál de las siguientes aseveraciones en relación a la Reducción Selectiva No Catalítica (RSNC) no es cierta?",
+    options: ["Se basa en incorporar NH₃ u otro agente reductor dentro de la propia caldera u horno","Es difícil de controlar por su gran sensibilidad a la temperatura","Utiliza los mismos agentes reductores que la RSC","Permite abaratar costes al usar un catalizador menos selectivo que la RSC","Tiene un rendimiento de eliminación de NOX máximo del orden del 50%"],
+    correct: 3
+  },
+  {
+    id: 15,
+    text: "El rendimiento de un ciclón depende de:",
+    options: ["El número de vueltas de las partículas en el ciclón, la densidad de las partículas y la viscosidad del gas","La velocidad de migración de la partícula al colector, la densidad de las partículas y la viscosidad del gas","La viscosidad, diámetro y densidad de las partículas","La fuerza centrífuga, la viscosidad de las partículas y el volumen del ciclón","El diámetro de las partículas, el material del ciclón y la densidad del gas"],
+    correct: 0
+  },
+  {
+    id: 16,
+    text: "El proceso de lavado en seco para eliminación de SO₂:",
+    options: ["Tiene el inconveniente de generar un efluente líquido que requiere un tratamiento posterior","Se realiza añadiendo caliza en el horno","Es el sistema más efectivo","Tiene la ventaja de poder implementarse en cualquier proceso de combustión","Está poco extendido por su alto coste de operación"],
+    correct: 1
+  },
+  {
+    id: 17,
+    text: "¿Qué tecnología es más apropiada para eliminar COVs olorosos en baja concentración y temperatura ambiente?",
+    options: ["Biofiltros","Filtros de mangas","Absorción regenerativa","Fangos activos","Reducción selectiva no catalítica"],
+    correct: 0
+  },
+  {
+    id: 18,
+    text: "La limpieza en un electrofiltro se realiza:",
+    options: ["Mediante el golpeo del electrodo colector","Con una corriente de vapor de agua","Mediante el calentamiento del gas","Cambiando el sentido de la diferencia de potencial","Mediante el paso de un gas contracorriente"],
+    correct: 0
+  },
+  {
+    id: 19,
+    text: "Los coeficientes de difusión (σy, σz) utilizados en los modelos de dispersión de tipo Gaussiano:",
+    options: ["Dependen de las condiciones atmosféricas e intervienen en el cálculo de la sobreelevación del penacho","Son independientes de la distancia a la fuente, sólo varían con la clase de estabilidad","Representan el transporte debido a la advección en las direcciones perpendiculares al viento dominante","Son proporcionales a la tasa de emisión de contaminantes","Parametrizan el transporte turbulento y se relacionan con el grado de estabilidad atmosférica"],
+    correct: 4
+  },
+  {
+    id: 20,
+    text: "¿Cuál de las siguientes medidas consigue prevenir la emisión de óxidos de nitrógeno en una central térmica?",
+    options: ["Introducir el aire y el combustible por etapas","Aumentar los tiempos de reacción para una combustión completa","Añadir caliza en el horno","Aumentar la temperatura de combustión","Reducir la recirculación de los gases de escape"],
+    correct: 0
+  },
+  {
+    id: 21,
+    text: "¿Cuándo interesa aplicar un método de tratamiento no destructivo?",
+    options: ["Cuando está integrado en una mezcla de diversas sustancias","Cuando es tóxico","Cuando tiene una volatilidad muy alta","Cuando el contaminante tiene valor económico","Todas las respuestas son correctas"],
+    correct: 3
+  },
+  {
+    id: 22,
+    text: "¿Cuál de las siguientes aseveraciones en relación a los sistemas de adsorción no es cierta?",
+    options: ["Es un sistema de tratamiento destructivo","Son sistemas discontinuos, ya que requieren su interrupción periódica para desorber el lecho","Se pueden utilizar para capturar Hg, CO₂ y COVs","Están contraindicados cuando el efluente contiene grandes cantidades de partículas","Tienen un rendimiento óptimo a baja temperatura y alta presión"],
+    correct: 0
+  },
+  {
+    id: 23,
+    text: "Las pérdidas de carga de dos unidades de tratamiento iguales que trabajan en paralelo:",
+    options: ["Son la mitad de la pérdida de carga de una de ellas","Dependen de la concentración del contaminante","Son iguales a la pérdida de carga de una de ellas al cuadrado","Son iguales a la pérdida de carga de una de ellas","Son el doble de la pérdida de carga de una de ellas"],
+    correct: 3
+  },
+  {
+    id: 24,
+    text: "Los filtros de mangas son una tecnología de separación de partículas en corrientes gaseosas especialmente indicada para:",
+    options: ["Efluentes con un gran volumen y sin variaciones de concentración ni caudal","Tamaños de partículas superiores a 100 μm","Gases con una temperatura por encima de 500 ºC","Ninguna de las respuestas es correcta","Partículas líquidas o corrientes saturadas de humedad que impiden el uso de precipitadores electrostáticos"],
+    correct: 3
+  },
+  {
+    id: 25,
+    text: "Los modelos de calidad del aire:",
+    options: ["Son imprescindibles para estimar con precisión los niveles de emisión","Son aplicables únicamente a fuentes de tipo puntual","Todas las respuestas son correctas","Están basados en la ecuación de advección-difusión","Permiten clasificar la atmósfera según las condiciones de estabilidad"],
+    correct: 3
+  },
+  {
+    id: 26,
+    text: "¿Qué es el diámetro aerodinámico de una partícula?",
+    options: ["El diámetro de una esfera de densidad unidad que tiene la misma velocidad terminal que la partícula en cuestión","El diámetro de una esfera con densidad igual a la de la partícula que presenta la misma resistencia que la partícula en cuestión","El diámetro de una esfera con densidad igual a la de la partícula con la misma velocidad terminal que la de la partícula en cuestión","El diámetro de un círculo con superficie igual a la de la partícula y que presenta la misma resistencia que la partícula en cuestión","Ninguna de las anteriores"],
+    correct: 0
+  },
+  {
+    id: 27,
+    text: "¿Cuál de las siguientes medidas previene la emisión de óxidos de nitrógeno (NOx) en una central térmica?",
+    options: ["Introducir el aire y el combustible por etapas","Aumentar la temperatura de combustión","Añadir caliza en el horno","Aumentar los tiempos de reacción para una combustión completa","Reducir la recirculación de gases de escape"],
+    correct: 0
+  },
+  {
+    id: 28,
+    text: "Las principales simplificaciones del modelo de penacho gaussiano son:",
+    options: ["Contaminante no reactivo, dispersión sólo bajo condiciones inestables y la concentración se aproxima a una distribución normal en los ejes x e y","Contaminante no reactivo, un único foco emisor y la concentración se aproxima a una distribución normal en z e y","Los procesos de difusión son despreciables frente a la deposición, contaminante no reactivo y único foco emisor","Un único foco emisor, los procesos de advección son despreciables y la concentración se aproxima a una distribución en los ejes z e y","El contaminante reacciona sólo con los compuestos de la atmósfera y la concentración se aproxima a una distribución normal en los ejes z e y"],
+    correct: 1
+  },
+  {
+    id: 29,
+    text: "Los procesos de captura de CO₂:",
+    options: ["Sólo aplicables a centrales térmicas que utilizan carbón","Son obligatorios para las centrales térmicas en Europa","Están limitados por la falta de capacidad de almacenamiento permanente","Constituyen la base de las estrategias de descarbonización a nivel internacional","Reducen considerablemente el rendimiento de las centrales térmicas en los que se aplican"],
+    correct: 4
+  },
+  {
+    id: 30,
+    text: "¿Cuál es la definición correcta de aerosol?",
+    options: ["Una dispersión de partículas sólidas y/o líquidas en un medio gaseoso","Una dispersión de cenizas en un gas","Una dispersión de partículas líquidas en un medio gaseoso","Una dispersión de partículas sin quemar en un gas","Una dispersión de partículas sólidas en un medio gaseoso"],
+    correct: 0
+  },
+  {
+    id: 31,
+    text: "¿Qué afirmación sobre las cámaras de gravedad es cierta?",
+    options: ["Suelen utilizarse como tratamientos previos a otros más sofisticados","Todas las respuestas son correctas","Su rendimiento mejora cuanto mayor es el diámetro y la densidad de las partículas","Se utilizan únicamente para eliminar partículas de gran tamaño","Su rendimiento mejora disminuyendo la temperatura de la corriente gaseosa"],
+    correct: 1
+  },
+  {
+    id: 32,
+    text: "Los procesos de sorción de SOx:",
+    options: ["Normalmente no son necesarios si el combustible utilizado es carbón","Siempre necesitan de soluciones de caliza para ser efectivos","Son siempre más efectivos cuando se aumenta la temperatura de los gases a tratar","Generalmente reducen de forma simultánea las emisiones de partículas con un rendimiento similar al de los filtros de mangas","Se dividen en sistemas secos, semisecos y húmedos"],
+    correct: 4
+  },
+  {
+    id: 33,
+    text: "Cuanto más rápido es el enfriamiento de la atmósfera con la altura:",
+    options: ["Más estable es la atmósfera","Más inestable es la atmósfera","Más intensa es la inversión térmica","Menos probable es que se forme un penacho serpenteante","Más probable es que se forme un penacho tubular"],
+    correct: 1
+  },
+  {
+    id: 34,
+    text: "¿Qué procesos son válidos para reducir la emisión de COVs?",
+    options: ["Oxidación biológica, condensación y separación con membranas","Electrofiltro, condensación y congelación","Adsorción, oxidación catalítica y reducción no catalítica","Absorción biológica, filtro de mangas y separación con membranas","Adsorción, reducción y congelación"],
+    correct: 0
+  },
+  {
+    id: 35,
+    text: "¿Cuál de las siguientes aseveraciones en relación a las instrucciones técnicas para el dimensionamiento de chimeneas no es cierta?",
+    options: ["Sólo aplica a instalaciones pequeñas y medianas","Tiene en cuenta si hay obstáculos en las inmediaciones de la planta que pudiesen afectar a la dispersión","Requiere el uso de valores meteorológicos con resolución horaria","El método de cálculo es muy sensible al valor de contaminación de fondo","Se calcula la altura de chimenea por separado para cada contaminante de interés"],
+    correct: 2
+  },
+  {
+    id: 36,
+    text: "Los filtros de mangas tienen:",
+    options: ["Sistemas de limpieza variados que les permiten trabajar siempre en continuo","El mismo rendimiento con independencia del tamaño de partícula a tratar","Un rendimiento creciente a medida que se ensucian las mangas","Pérdidas de carga constantes en el tiempo","Un rendimiento constante que depende fundamentalmente del material de la manga"],
+    correct: 2
+  },
+  {
+    id: 37,
+    text: "Para mejorar el rendimiento de un ciclón sin aumentar las pérdidas de carga del sistema se puede:",
+    options: ["Sustituir el ciclón por una cámara de gravedad de tamaño similar","No es posible mejorar el rendimiento sin incurrir en mayores PdC","Sustituirlo por dos ciclones en paralelo, siempre que se mantenga la velocidad de operación inicial","Añadir otro ciclón en serie, siempre que se mantenga la velocidad de operación inicial","Basta con disminuir el diámetro del ciclón"],
+    correct: 2
+  },
+  {
+    id: 38,
+    text: "La altura de chimenea (hg) recomendable para una instalación industrial es aquella:",
+    options: ["A partir de la cual, incrementar la altura de chimenea no implica mejoras apreciables en los niveles de concentración","Que iguala la sobreelevación inicial del penacho (Δh)","A partir de la cual se cumple el valor de calidad del aire legalmente exigible","Para la que se obtiene un impacto en la calidad del aire nulo","Que permite prescindir de la impulsión forzada de los gases"],
+    correct: 0
+  },
+  {
+    id: 39,
+    text: "La estabilidad atmosférica:",
+    options: ["Siempre se asocia a situaciones de inversión térmica","Carece de importancia en el proceso de dispersión de contaminantes atmosféricos","Facilita la dispersión de contaminantes","Favorece la acumulación de contaminantes y la generación de altos valores de inmisión","Típicamente se asocia a gradientes verticales térmicos negativos muy acusados"],
+    correct: 3
+  },
+  {
+    id: 40,
+    text: "Con carácter general, ¿cuál es la dependencia de la concentración en el suelo de las emisiones contaminantes en una chimenea?",
+    options: ["La concentración no depende de la altura de la chimenea","Ninguna de las respuestas es correcta","La concentración no varía si se ha alcanzado la sobreelevación máxima","La concentración disminuye con la altura de la chimenea","La concentración aumenta con la altura de la chimenea"],
+    correct: 3
+  },
+  {
+    id: 41,
+    text: "El cálculo de la altura mínima de chimenea de acuerdo a la instrucción técnica ATM-E-EC-01:",
+    options: ["Implica el uso de un modelo de dispersión de tipo Gaussiano","Sólo es aplicable cuando la instalación industrial tiene una única chimenea","Es muy sensible a los niveles de fondo de contaminación","Aplica una formulación específica en función de la estabilidad atmosférica","No considera el efecto de posibles obstáculos capaces de perturbar la dispersión de gases"],
+    correct: 2
+  },
+  {
+    id: 42,
+    text: "Los coeficientes de difusión (σy, σz) utilizados en los modelos de dispersión de tipo Gaussiano:",
+    options: ["Son independientes de la distancia a la fuente, sólo varían con la clase de estabilidad","Parametrizan el transporte turbulento y se relacionan con el grado de estabilidad atmosférica","Dependen de las condiciones atmosféricas e intervienen en el cálculo de la sobreelevación del penacho","Vienen dados por las coordenadas del receptor donde se quiere calcular la concentración de contaminantes","Representan el transporte debido a la advección en las direcciones perpendiculares al viento dominante"],
+    correct: 1
+  },
+  {
+    id: 43,
+    text: "Una configuración high dust para un sistema de RCS:",
+    options: ["Se refiere a que la unidad de RCS está inmediatamente antes de la chimenea","Está especialmente indicado cuando se usan catalizadores caros","En general dará lugar a una menor vida útil del catalizador","Sólo es viable cuando se usa carbón activo como catalizador","Implica que la planta carece de un sistema de tratamiento de partículas"],
+    correct: 2
+  },
+  {
+    id: 44,
+    text: "En términos generales ¿qué instalaciones pueden asumir costes de operación más altos para los sistemas de tratamiento de sus efluentes gaseosos?",
+    options: ["Aquellas en las que la corriente a tratar tiene un caudal muy alto","Aquellas no sometidas a regulación de emisiones específicamente","Instalaciones que tienen un número de horas de funcionamiento muy alto","Grandes instalaciones que pueden asumir grandes costes de inversión","Pequeñas instalaciones que tienen que minimizar los costes fijos"],
+    correct: 0
+  },
+  {
+    id: 45,
+    text: "¿Qué parámetro no se utiliza en las instrucciones técnicas para el dimensionamiento de chimeneas de instalaciones pequeñas y medianas?",
+    options: ["Número de chimeneas","Valor de contaminación de fondo","La altura de la capa de mezcla","Emisión del contaminante","Diferencia entre la temperatura de los gases a la salida de la chimenea y la temperatura media de la atmósfera"],
+    correct: 2
+  },
+  {
+    id: 46,
+    text: "La reducción de las emisiones de CO₂ en una central térmica conlleva la reducción de NOX y partículas:",
+    options: ["Siempre es cierto","Sólo es cierto cuando se instalan sistemas de depuración posteriores","Sólo es cierto cuando se sustituye la fuente energética","Sólo es cierto cuando se hace una captura y secuestro de CO₂","No tiene por qué ser cierto"],
+    correct: 4
+  },
+  {
+    id: 47,
+    text: "La mejor opción para tratar una corriente gaseosa con partículas de tamaño aerodinámico medio de 1 μm y a una temperatura de 800ºC es:",
+    options: ["Un electrofiltro","Un conjunto de ciclones","Una cámara de gravedad","Un filtro de mangas","Un conjunto de filtros de mangas"],
+    correct: 0
+  },
+  {
+    id: 48,
+    text: "La mejor opción para tratar una corriente gaseosa de gran caudal con partículas de tamaño aerodinámico medio de 60 μm y a una temperatura de 800ºC es:",
+    options: ["Un electrofiltro","Un lavador","Un filtro de mangas","Un conjunto de ciclones","Una cámara de gravedad"],
+    correct: 3
+  },
+  {
+    id: 49,
+    text: "Las pérdidas de carga de dos unidades de tratamiento iguales que trabajan en serie:",
+    options: ["Son iguales a la pérdida de carga de una de ellas","Son iguales a la pérdida de carga de una de ellas al cuadrado","Dependen de la concentración del contaminante","Son el doble de la pérdida de carga de una de ellas","Son la mitad de la pérdida de carga de una de ellas"],
+    correct: 3
+  },
+  {
+    id: 50,
+    text: "¿Cuál de las siguientes aseveraciones en relación a los filtros de mangas es cierta?",
+    options: ["Se adaptan mejor a cambios de concentración que los precipitadores electrostáticos","Tienen la ventaja de proporcionar un rendimiento constante en el tiempo","Son la única alternativa viable para tratar partículas líquidas","La resistividad de las partículas a tratar es crítica para su operación","Tienen la ventaja de generar muy bajas pérdidas de carga"],
+    correct: 0
+  },
+  {
+    id: 51,
+    text: "¿Qué sistema de tratamiento es el más adecuado para eliminar los compuestos orgánicos olorosos originados en una planta de tratamiento biológico de residuos?",
+    options: ["Oxidación biológica (biofiltros)","Absorción con aminas en un esquema regenerativo","Combustión no catalítica","Condensación","Combustión catalítica"],
+    correct: 0
+  },
+  {
+    id: 52,
+    text: "¿Qué métodos son efectivos para reducir la emisión de metales en una central térmica de carbón?",
+    options: ["La sustitución del combustible por otro de tipo líquido o gaseoso","Todas las respuestas son correctas","El uso de precipitadores electrostáticos","La mejora del rendimiento del proceso","El uso de filtros de mangas"],
+    correct: 1
+  },
+  {
+    id: 53,
+    text: "El rendimiento de una cámara de gravedad se incrementa con: (variante)",
+    options: ["La longitud de la cámara, el diámetro de las partículas y la densidad de las partículas","La viscosidad, la longitud de la cámara y la densidad de las partículas","La altura de la cámara, el diámetro de las partículas y la densidad de las partículas","La longitud de la cámara, la velocidad de movimiento horizontal y la densidad de las partículas","La longitud de la cámara, el diámetro de las partículas y la densidad de la corriente gaseosa"],
+    correct: 0
+  },
+  {
+    id: 54,
+    text: "La ecuación η₀ = 1 − (1 − η₁)(1 − η₂)...(1 − ηₙ) se emplea para calcular:",
+    options: ["Ninguna de las definiciones es correcta","El rendimiento fraccionario","La penetración de un sistema de depuración","El rendimiento de sistemas de depuración en paralelo","El rendimiento de sistemas de depuración en serie"],
+    correct: 4
+  },
+  {
+    id: 55,
+    text: "La pérdida de carga en un ciclón:",
+    options: ["Es, generalmente, superior a los 250 mm de columna de agua","Depende de la velocidad y densidad del gas","Para un caudal dado, crece al aumentar el tamaño del ciclón","Crece al aumentar la temperatura del gas","Depende de la velocidad del gas y de la densidad de las partículas"],
+    correct: 1
+  },
+  {
+    id: 56,
+    text: "¿Qué aseveración en relación a la altura del relleno en una columna de absorción no es cierta?",
+    options: ["Depende del rendimiento de eliminación necesario","Para el mismo rendimiento decrece si se incrementa la relación L/G","Es el producto de la altura de la unidad de transferencia por el número de unidades de transferencia","Para el mismo rendimiento aumenta si se aumenta la temperatura de operación","Viene dada por la pérdida de carga tolerable para la unidad"],
+    correct: 4
+  },
+  {
+    id: 57,
+    text: "¿Qué tienen en común los procesos de RSNC y RSC?",
+    options: ["En ambos casos se usa alguna sustancia para catalizar la reducción de los NOx a N₂","Ambos tienen la ventaja adicional de eliminar partículas finas simultáneamente a los NOx","Tienen rendimientos típicos por encima del 75%","Se implementan dentro de la cámara de combustión, ya que el proceso se favorece a temperaturas altas","En ambos casos se usa un agente reductor"],
+    correct: 4
+  },
+  {
+    id: 58,
+    text: "Los sistemas de membranas:",
+    options: ["Son muy robustos y toleran la presencia de partículas","Están indicados cuando el contaminante a tratar es valioso económicamente","No están muy extendidos por sus limitaciones de rendimiento","Son métodos destructivos de muy alta eficiencia","Están restringidos a la separación de CO₂ en centrales térmicas"],
+    correct: 1
+  },
+  {
+    id: 59,
+    text: "La principal ventaja del uso del coche eléctrico en entornos urbanos radica en que:",
+    options: ["Las emisiones atmosféricas se producen en otros lugares","No produce ningún tipo de emisiones durante la etapa de uso","Evita las emisiones de SO₂","Minimiza las emisiones de gases de efecto invernadero","Tiene una ratio NO/NOx mejor que los vehículos diésel"],
+    correct: 0
+  },
+  {
+    id: 60,
+    text: "Cuando la temperatura de la atmósfera crece con la altura:",
+    options: ["Se favorece la dispersión de contaminantes debido al incremento de la difusión","Se favorece la dispersión de contaminantes debido al incremento de la advección","La difusión está muy limitada y se tenderán a producir penachos de tipo tubular","La atmósfera es inestable al ser mayor el gradiente real que el adiabático","No puede darse el caso: la temperatura atmosférica siempre decrece con la altura"],
+    correct: 2
+  },
+  {
+    id: 61,
+    text: "¿Cuál de las siguientes medidas es más efectiva para aumentar el rendimiento en un ciclón, sin incrementar la pérdida de carga del conjunto?",
+    options: ["Sustituirlo por otro ciclón de menor tamaño","Sustituirlo por varios ciclones en paralelo de mayor tamaño","Sustituirlo por varios ciclones en serie de mayor tamaño","Sustituirlo por varios ciclones en paralelo de menor tamaño","Sustituirlo por varios ciclones en serie de menor tamaño"],
+    correct: 3
+  },
+  {
+    id: 62,
+    text: "Indicar qué aseveración no es cierta en relación a la difusión en un modelo de calidad del aire:",
+    options: ["Es proporcional a la turbulencia atmosférica","Se suele parametrizar, por ejemplo, a través de la teoría K","A igualdad de condiciones, es mayor para condiciones de inestabilidad","Es particularmente relevante en relación al transporte vertical de los contaminantes","Representa el arrastre de contaminantes por el viento medio"],
+    correct: 4
+  },
+  {
+    id: 63,
+    text: "La mejor opción para tratar una corriente gaseosa ácida de gran caudal con partículas de tamaño aerodinámico medio de 5 μm y a una temperatura de 150 °C es:",
+    options: ["Una cámara de gravedad","Un conjunto de filtros de mangas","Un lavador","Un conjunto de ciclones","Un electrofiltro"],
+    correct: 2
+  },
+  {
+    id: 64,
+    text: "La mejor opción para tratar una corriente gaseosa con partículas de tamaño aerodinámico medio de 1 μm y a una temperatura de 800 °C es:",
+    options: ["Un conjunto de ciclones","Un conjunto de filtros de mangas","Un electrofiltro","Un filtro de mangas","Una cámara de gravedad"],
+    correct: 2
+  },
+  {
+    id: 65,
+    text: "En una central térmica, si se pretende maximizar la vida útil del catalizador, la Reducción Selectiva Catalítica (RSC):",
+    options: ["Conviene instalarla después de otros sistemas de depuración, aunque haya que precalentar ligeramente los gases de entrada","Conviene instalarla justo antes de la chimenea para poder tener temperaturas inferiores a 150 °C","Conviene instalarla inmediatamente después de la cámara de combustión para tener elevadas temperaturas","Conviene instalarla antes del lavado para no interferir en la depuración de SOx y partículas","Ninguna de las respuestas es correcta"],
+    correct: 0
+  },
+  {
+    id: 66,
+    text: "Las emisiones fugitivas de COVs:",
+    options: ["Sólo son relevantes cuando se trata de compuestos tóxicos","Son inversamente proporcionales a la volatilidad de los compuestos orgánicos","Carecen de importancia en comparación con las emisiones canalizadas","Se pueden controlar garantizando la estanqueidad de la instalación y un adecuado mantenimiento de juntas y válvulas","Pueden controlarse lavando los camiones que transportan material a granel y las zonas de tránsito"],
+    correct: 3
+  },
+  {
+    id: 67,
+    text: "Una medida preventiva para reducir las emisiones de CO₂ en las calderas domésticas es:",
+    options: ["La eliminación de las calderas de condensación","La combustión con defecto de oxígeno para alejarse de las condiciones estequiométricas","La reducción de la temperatura de combustión","El uso de combustibles con mayor PCI por unidad de carbono","La gasificación previa del combustible"],
+    correct: 3
+  },
+  {
+    id: 68,
+    text: "La limpieza en un filtro de mangas se realiza:",
+    options: ["Mediante un proceso pirolítico","Con una corriente de vapor de agua","Por pulsos de aire comprimido","Mediante el calentamiento del gas","Mediante el golpeo del electrodo colector"],
+    correct: 2
+  },
+  {
+    id: 69,
+    text: "¿Qué aseveración en relación a las instrucciones técnicas para el dimensionamiento de chimeneas de instalaciones industriales no es cierta?",
+    options: ["Sólo es aplicable a instalaciones pequeñas o medianas","Establece una altura mínima de 10 m","Sólo es aplicable a contaminantes gaseosos","La fórmula de cálculo es muy sensible a los niveles de contaminación de fondo","Considera una corrección de la altura por la presencia de obstáculos"],
+    correct: 2
+  },
+  {
+    id: 70,
+    text: "El uso de calderas de biomasa en las ciudades:",
+    options: ["Sería viable en las salas de caldera de gas natural existentes","Disminuiría las emisiones netas de CO₂ pero aumentaría las de material particulado","Permitiría acoplar más fácilmente paneles solares térmicos a los edificios","Sería beneficioso para el medio ambiente puesto que reduciría las emisiones","Mejoraría el rendimiento energético de los edificios"],
+    correct: 1
+  },
+  {
+    id: 71,
+    text: "En un motor de combustión de un vehículo, la emisión de NOx se produce principalmente:",
+    options: ["Por el nitrógeno que tiene el combustible","Por el nitrógeno contenido en el aire","Por los mecanismos de formación en celdas","Por los tiempos de residencia en los sistemas de tratamiento de gases","Por las bajas temperaturas de combustión respecto a una instalación industrial"],
+    correct: 1
+  },
+  {
+    id: 72,
+    text: "¿Cuál de las siguientes aseveraciones en relación a las policloro dibenzo-p-dioxinas (PCDD) y policlorodibenzofuranos (PCDF) es cierta?",
+    options: ["Es preciso controlarlas por su papel como precursor del ozono troposférico","Son contaminantes secundarios que se forman gracias a la radiación ultravioleta","Se pueden controlar de forma muy efectiva mediante procesos de adsorción","Se pueden evitar utilizando cualquiera de las medidas preventivas para NOx","Se generan en cualquier proceso de combustión, independientemente del combustible"],
+    correct: 2
+  },
+  {
+    id: 73,
+    text: "Para aumentar la concentración de CO₂ de una corriente gaseosa y así favorecer su captura posterior, se puede emplear:",
+    options: ["Todas las respuestas son correctas","Una congelación antes de la emisión por la chimenea","Una absorción del CO₂ posterior a la combustión","Una separación del CO₂ con membranas","Una combustión con O₂ puro, separándolo previamente del N₂ del aire"],
+    correct: 4
+  },
+  {
+    id: 74,
+    text: "La sobreelevación de un penacho según el modelo gaussiano:",
+    options: ["Depende, fundamentalmente, de la temperatura y la presión ambiente, así como de la concentración de gases en el penacho","Sigue una distribución gaussiana en torno al eje y","Es constante a partir de xf","Sigue una distribución parabólica por la fuerza de la gravedad y depende de la distancia a la chimenea","Es constante a partir de una distancia de, aproximadamente, 200 m"],
+    correct: 2
+  },
+  {
+    id: 75,
+    text: "Los sistemas de condensación de COVNM:",
+    options: ["Son sistemas indicados para depurar bajas concentraciones de COVNM","Son sistemas destructivos ideales para la recuperación de COVNM con alto valor añadido","Están especialmente indicados para recuperar COVNM que condensan a muy baja temperatura","No tienen mucho sentido si se desea recuperar el contaminante separado","Están especialmente indicados para tratar efluentes con alta concentración de COVNM de alto valor añadido"],
+    correct: 4
+  },
+  {
+    id: 76,
+    text: "¿Cuál de los siguientes sistemas genera mayor pérdida de carga en la depuración de partículas en una corriente gaseosa?",
+    options: ["Filtro de mangas","Separador inercial","Ciclón","Electrofiltro","Cámara de gravedad"],
+    correct: 0
+  },
+  {
+    id: 77,
+    text: "¿Cuál de las siguientes afirmaciones sobre las cámaras de gravedad es correcta?",
+    options: ["Permiten eliminar eficientemente partículas con un diámetro inferior a 50 μm","No requieren de grandes espacios","Su rendimiento mejora cuanto mayores son la altura de la cámara, el diámetro de las partículas y la viscosidad de los gases","Su rendimiento empeora cuanto mayor es el diámetro y la densidad de las partículas","Ninguna de las respuestas es correcta"],
+    correct: 4
+  },
+  {
+    id: 78,
+    text: "La condensación:",
+    options: ["Permite la eliminación de NOx con bajo coste","Es un tratamiento de tipo destructivo","Permite separar las partículas de mayor tamaño con bajas pérdidas de carga","Es un proceso físico que permite separar los COVs de una corriente gaseosa","Es un proceso físico que permite separar los óxidos de azufre de una corriente gaseosa"],
+    correct: 3
+  },
+  {
+    id: 79,
+    text: "La opción de captura de CO₂ basada en la oxicombustión:",
+    options: ["No tiene impacto sobre el rendimiento energético de los procesos de combustión","Tiene la ventaja adicional de evitar la generación de NOx térmico","Es la opción con mayor implementación a escala industrial actualmente","Implica una gasificación previa del combustible","No es compatible con procesos de separación del CO₂ por absorción"],
+    correct: 1
+  },
+  {
+    id: 80,
+    text: "¿Cuál de las siguientes ventajas del uso del vehículo eléctrico en la ciudad no es cierta?",
+    options: ["Permite alejar las emisiones atmosféricas de zonas muy pobladas, reduciendo la exposición","Evita las emisiones evaporativas derivadas del uso de combustibles fósiles","No produce emisión directa de óxidos de nitrógeno durante la fase de uso","Dependiendo del mix de producción eléctrica puede reducir sustancialmente las emisiones de gases de efecto invernadero","Minimiza la resuspensión de partículas del suelo"],
+    correct: 4
+  },
+  {
+    id: 81,
+    text: "Una central térmica de carbón de 800 MW que opera 6500 horas anuales debe reducir sus emisiones de SO₂ en un 96 %. ¿Qué sistema es más interesante considerando los aspectos técnicos y económicos si lo que interesa es reducir los costes de operación?",
+    options: ["Adición de caliza en el horno","Reducción Selectiva Catalítica","Adsorción mediante carbón activo","Lavado semiseco","Lavado húmedo"],
+    correct: 4
+  },
+  {
+    id: 82,
+    text: "Las calderas de condensación:",
+    options: ["Tienen nulas emisiones de CO₂","Tienen un mejor rendimiento ya que aprovechan el PCS del combustible","Tienen un rendimiento superior al 100% referido al PCS","Sólo se han desarrollado para aplicaciones industriales","Necesitan utilizar gas natural como combustible"],
+    correct: 1
+  },
+  {
+    id: 83,
+    text: "La recirculación de parte de los gases de escape en un proceso de combustión está indicada para reducir las emisiones de:",
+    options: ["CO₂","PM","NOx","Cualquier contaminante","SO₂"],
+    correct: 2
+  },
+  {
+    id: 84,
+    text: "¿Cuál de las siguientes afirmaciones relativas al uso de membranas para el tratamiento de efluentes gaseosos es falsa?",
+    options: ["Son un tratamiento de tipo no destructivo, interesante para recuperar contaminantes valiosos","Tiene alto rendimiento y selectividad","Su funcionamiento se basa en la permeabilidad selectiva de la membrana","Es un sistema delicado que requiere un mantenimiento intensivo y cambios frecuentes","Está especialmente indicado para tratar simultáneamente gases y partículas"],
+    correct: 4
+  },
+  {
+    id: 85,
+    text: "¿Cuál es la ventaja fundamental de los multiciclones frente a los ciclones convencionales?",
+    options: ["Facilitan la gestión posterior de las partículas eliminadas","Permiten tratar partículas líquidas","Permiten incrementar el rendimiento de separación a igualdad de pérdidas de carga","Su rendimiento no depende del concepto de diámetro de corte","Permiten eliminar el PM1 de la corriente a tratar"],
+    correct: 2
+  },
+  {
+    id: 86,
+    text: "Una atmósfera inestable a cualquier altura y viento moderado da lugar a un penacho:",
+    options: ["Ninguno de los otros","Antifumigante","Serpenteante","Tubular","Fumigante"],
+    correct: 2
+  },
+  {
+    id: 87,
+    text: "Las principales tecnologías de absorción son:",
+    options: ["Torres de pulverización, relleno y platos","Torres de lavado, oxidación biológica y pulverización","Torres de lavado, absorción y pulverización","Torres de platos, ducha y relleno","Todas las respuestas son correctas"],
+    correct: 0
+  },
+  {
+    id: 88,
+    text: "¿Cuál de las siguientes aseveraciones en relación a los sistemas de adsorción es cierta?",
+    options: ["No es recomendable si la concentración de adsorbato es elevada","Está especialmente indicada para eliminar partículas y COVs simultáneamente","El rendimiento es independiente de las condiciones de P y T","Los sistemas de adsorción pueden trabajar a punto de ruptura o a punto de saturación","Es un proceso irreversible"],
+    correct: 3
+  },
+  {
+    id: 89,
+    text: "Una oxidación biológica de COVs:",
+    options: ["Requiere espacios pequeños","Requiere grandes consumos de energía para proporcionar la temperatura de trabajo adecuada","No hay una tasa neta de generación de microorganismos porque se autodegradan","Es un sistema poco flexible a variaciones de caudal y concentración","Es un sistema que permite variaciones de caudal y concentración"],
+    correct: 4
+  },
+  {
+    id: 90,
+    text: "Si el diámetro de corte de un ciclón es 10 μm, el rendimiento del ciclón para separar partículas de 5 μm será:",
+    options: ["Mayor o menor del 50% dependiendo del número de vueltas","Mayor o menor del 50% dependiendo de la densidad de las partículas","Menor del 50%","Igual al 50%","Mayor del 50%"],
+    correct: 2
+  },
+  {
+    id: 91,
+    text: "La Reducción Selectiva No Catalítica (RSNC) frente a la catalítica (RSC):",
+    options: ["Es más barata porque permite prescindir del agente reductor","Se realiza a menor temperatura","Tiene un menor rendimiento","Permite eliminar simultáneamente NOx y COVs","Tiene un menor coste de operación pero requiere mayor inversión"],
+    correct: 2
+  },
+  {
+    id: 92,
+    text: "Una caldera de combustión de biomasa de 50 MW requiere un sistema de tratamiento para evitar la emisión de partículas. La alternativa más adecuada sería:",
+    options: ["Un lavador Venturi","Un filtro de mangas","Un sistema de lavado con cal","Una cámara de gravedad","Un conjunto de ciclones"],
+    correct: 1
+  },
+  {
+    id: 93,
+    text: "¿Cuáles de los siguientes procesos son válidos para reducir la emisión de CO₂?",
+    options: ["Reducción selectiva catalítica","Absorción","Electrofiltación","Reducción selectiva no catalítica","Oxidación química"],
+    correct: 1
+  },
+  {
+    id: 94,
+    text: "¿Cuándo es recomendable acoplar un dispositivo tipo Venturi a una columna de absorción?",
+    options: ["Cuando la relación L/G es muy baja","Cuando se quiere reducir el coste de operación de la unidad","Cuando se quieren eliminar partículas en la corriente","Cuando es preciso minimizar las pérdidas de carga","Cuando es preciso reducir la temperatura del efluente"],
+    correct: 2
+  },
+  {
+    id: 95,
+    text: "La pérdida de carga en un filtro de mangas:",
+    options: ["Tiene una relación inversamente proporcional al rendimiento","Depende exclusivamente de la velocidad de filtración","Es constante en el tiempo","Es inferior a la de los precipitadores electrostáticos","Se estima a través de un término fijo relativo al textil y uno variable dependiente del grosor de la capa de partículas retenidas"],
+    correct: 4
+  },
+  {
+    id: 96,
+    text: "¿Cuáles de los siguientes procesos de depuración de efluentes gaseosos son métodos destructivos?",
+    options: ["Oxidación biológica y adsorción","Electrofiltración y absorción","Oxidación catalítica y oxidación biológica","Separación con membranas y oxidación catalítica","Adsorción y reducción catalítica"],
+    correct: 2
+  },
+  {
+    id: 97,
+    text: "La mejor opción para tratar una corriente gaseosa de gran caudal con partículas de tamaño aerodinámico medio de 60 μm y a una temperatura de 800 °C es:",
+    options: ["Una cámara de gravedad","Un lavador","Un conjunto de ciclones","Un electrofiltro","Un filtro de mangas"],
+    correct: 2
+  },
+  {
+    id: 98,
+    text: "Las técnicas para separar el CO₂ del resto de gases de combustión son:",
+    options: ["Adsorción, oxidación, condensación y membranas","Oxidación, reducción, criogenización y membranas","Absorción, adsorción, reducción y membranas","Absorción, adsorción, criogenización y membranas","Membranas, adsorción, oxidación biológica y condensación"],
+    correct: 3
+  },
+  {
+    id: 99,
+    text: "Una planta de generación eléctrica con turbinas de gas (ciclo Brayton) necesita reducir sus emisiones de NOx un 30%. ¿Cuál sería la solución adecuada?",
+    options: ["Recirculación de los gases de escape","Un sistema de combustión escalonada","Quemadores de bajo NOx","Un sistema de reducción selectiva no catalítica","Un sistema de reducción selectiva catalítica"],
+    correct: 2
+  },
+  {
+    id: 100,
+    text: "Generalmente la distribución de tamaños de un aerosol atmosférico se ajusta bien a una distribución:",
+    options: ["Normal","Log-normal","Gaussiana","Exponencial","Binomial"],
+    correct: 1
+  },
+  {
+    id: 101,
+    text: "¿Qué aseveración en relación a los costes de operación de un sistema de depuración de efluentes gaseosos industriales no es cierta?",
+    options: ["Se refieren a la amortización en el tiempo del coste de implementación de un sistema de tratamiento dado","Guardan relación con las pérdidas de carga generadas por el sistema de depuración","Son variables, ya que dependen de la mayor o menor tasa de actividad","Minimizarlos es particularmente importante para actividades que generan una gran cantidad de emisiones","Tiene un impacto directo en la rentabilidad económica del proceso productivo"],
+    correct: 0
+  },
+  {
+    id: 102,
+    text: "Desde el punto de vista de la calidad del aire, el fomento de vehículos eléctricos en zonas urbanas:",
+    options: ["Es beneficioso fundamentalmente porque reduce la congestión","Tendrá un impacto claro en la reducción de los niveles de NO₂","Todas las respuestas son correctas","Será particularmente efectivo para reducir los niveles de PM10","Es esencial por la reducción de emisiones de CO₂ aparejada"],
+    correct: 1
+  },
+  {
+    id: 103,
+    text: "Un precipitador electrostático está especialmente indicado cuando:",
+    options: ["La corriente a tratar está a alta temperatura y saturada de humedad","Interesa minimizar los costes de inversión","Hay poca disponibilidad de espacio","Las partículas están compuestas por materia orgánica mayoritariamente","El tamaño de partícula es superior a 10 μm"],
+    correct: 0
+  },
+  {
+    id: 104,
+    text: "Los sistemas de tratamiento de partículas ordenados en función de las pérdidas de carga típicas, de mayor a menor son:",
+    options: ["Precipitadores electrostáticos, separadores húmedos y filtros de mangas","Precipitadores electrostáticos, cámaras de gravedad, separadores húmedos y filtros de mangas","Filtros de mangas, cámaras de gravedad, multiciclones y separadores húmedos","Filtros de mangas, ciclones, precipitadores electrostáticos y cámaras de gravedad","Precipitadores electrostáticos, filtros de mangas y separadores húmedos"],
+    correct: 3
+  },
+  {
+    id: 105,
+    text: "A la hora de seleccionar una tecnología para el tratamiento de efluentes gaseosos, los aspectos técnicos a considerar son:",
+    options: ["Alcanzar el máximo rendimiento posible ocupando el mínimo espacio posible y minimizando el impacto ambiental","Alcanzar un rendimiento muy superior al legal ocupando el mínimo espacio posible","Todas las respuestas son correctas","Alcanzar el rendimiento óptimo con los costes de inversión mínimos, independientemente de los costes de operación","Alcanzar el rendimiento que cumpla las especificaciones ocupando el mínimo espacio posible y minimizando el impacto ambiental"],
+    correct: 4
+  },
+  {
+    id: 106,
+    text: "Cuando la temperatura de la atmósfera decrece con la altura más intensamente que el gradiente adiabático medio de la troposfera:",
+    options: ["Se tenderán a formar penachos tubulares","Se tenderán a formar penachos fumigantes","Se tenderán a formar penachos antifumigantes","Se tenderán a formar penachos de tipo serpenteante","Se tenderán a formar penachos cónicos"],
+    correct: 3
+  },
+  {
+    id: 107,
+    text: "Los procesos de absorción:",
+    options: ["Están limitados a la depuración de material particulado","Son válidos para la captura de CO₂ (usando soluciones acuosas de aminas o alcoholes)","Tienen rendimientos típicos por debajo del 50%","Tienen un alto coste ya que requieren introducir el absorbente a alta temperatura","Se utilizan fundamentalmente para la eliminación de COVNM"],
+    correct: 1
+  },
+  {
+    id: 108,
+    text: "En un modelo gaussiano, las clases de estabilidad se utilizan para:",
+    options: ["Estimar la sobreelevación inicial del penacho, y por tanto, la altura efectiva de vertido","Representar el efecto de la topografía en la simulación","Establecer el tipo de penacho","Calcular el gradiente térmico vertical","Definir la forma de calcular los coeficientes de difusión"],
+    correct: 4
+  },
+  {
+    id: 109,
+    text: "La configuración de fin de tubería o 'Tail-end' para un sistema de reducción catalítica selectiva (RSC) de NOx:",
+    options: ["Es la más común para plantas que ya están construidas debido a las limitaciones de espacio de las mismas","Generalmente trabaja con zeolitas debido a la alta temperatura de proceso","Debe ser la última opción a considerar debido a su bajo nivel de reducción de NOx","Tiene el inconveniente de la pérdida de actividad del catalizador por ensuciamiento","La elevada temperatura de operación permite el uso de catalizadores de bajo coste"],
+    correct: 0
+  },
+  {
+    id: 110,
+    text: "¿Cuál de las siguientes aseveraciones en relación a los sistemas de oxidación biológica (biofiltración) no es cierta?",
+    options: ["Deben trabajar en condiciones cercanas a las ambientales","Son muy utilizados para la eliminación de olores","Tienen un coste reducido","Se adaptan bien a cambios de concentración y caudal","No son eficaces con altos niveles de concentración"],
+    correct: 3
+  },
+  {
+    id: 111,
+    text: "Los sistemas de captura, transporte y almacenamiento de CO₂:",
+    options: ["Bajan el rendimiento global de las centrales térmicas","Están ampliamente implantados en los países nórdicos","Tienen unos costes de inversión altos pero de explotación muy bajos","Consiguen reducir la generación de CO₂","No consiguen reducir la emisión de CO₂ a la atmósfera en su ciclo de vida completo"],
+    correct: 0
+  },
+  {
+    id: 112,
+    text: "La principal ventaja del sistema de desulfuración semiseco frente al húmedo es:",
+    options: ["La posibilidad de recuperar el S en forma de un subproducto útil","Su menor coste de operación","La posibilidad de usar absorbentes más baratos","Que no genera un efluente líquido","Su mayor rendimiento"],
+    correct: 3
+  },
+  {
+    id: 113,
+    text: "Los mecanismos de captación de partículas que intervienen en los equipos de depuración de partículas son:",
+    options: ["Sedimentación por gravedad","Difusión","Interceptación directa","Todas las respuestas son correctas","Atracción electrostática"],
+    correct: 3
+  },
+  {
+    id: 114,
+    text: "El proceso de lavado en seco para eliminación de SO₂ (variante):",
+    options: ["Tiene el inconveniente de generar un efluente líquido que requiere un tratamiento posterior","Se realiza añadiendo caliza en el horno","Es el sistema más efectivo","Está poco extendido por su alto coste de operación","Tiene la ventaja de poder implementarse en cualquier proceso de combustión"],
+    correct: 1
+  },
+  {
+    id: 115,
+    text: "Las emisiones de CO₂-equivalente de un coche eléctrico en Europa, considerando el ciclo de vida completo:",
+    options: ["Se asocian fundamentalmente al mantenimiento del vehículo","Son siempre menores que las de un vehículo diésel independientemente del mix eléctrico del país","Se deben fundamentalmente a las emisiones de CH₄","Son nulas","Son del orden de la mitad que las de un vehículo similar de gasolina como media"],
+    correct: 4
+  },
+  {
+    id: 116,
+    text: "Un filtro de mangas frente a un electrofiltro (variante):",
+    options: ["Es igual de seguro ante el riesgo de incendios que de explosiones","Es más seguro ante el riesgo de incendios pero menos ante explosiones","Depura partículas más finas","Es más seguro ante explosiones pero menos ante el riesgo de incendios","Puede funcionar a temperaturas más elevadas"],
+    correct: 3
+  },
+  {
+    id: 117,
+    text: "La pérdida de carga en un filtro de mangas:",
+    options: ["En general, es menor que en un electrofiltro","Es constante, lo que asegura el buen rendimiento de depuración del sistema","Está inversamente relacionada con el rendimiento del sistema","Crece con el tiempo de operación entre limpieza y limpieza","Decrece con el tiempo de operación entre limpieza y limpieza"],
+    correct: 3
+  },
+  {
+    id: 118,
+    text: "La sobreelevación inicial del penacho:",
+    options: ["Está supeditada a un valor igual o menor al de la altura de chimenea","Es función de los coeficientes de difusión (σy; σz)","Es independiente de las condiciones de estabilidad/inestabilidad atmosférica","Depende en gran medida de la temperatura y velocidad de los gases de salida en chimenea","Es constante para valores menores o igual que xf"],
+    correct: 3
+  },
+  {
+    id: 119,
+    text: "El sistema de pre-captura de CO₂:",
+    options: ["Requiere el uso de O₂ puro en la combustión del H₂ producido","Implica una gasificación previa del combustible a utilizar","Consiste en recircular la corriente de CO₂ producida en la combustión","Es sencillo de implementar y permite reducir los costes de operación","No es aplicable a instalaciones que utilizan carbón como combustible"],
+    correct: 1
+  },
+  {
+    id: 120,
+    text: "¿Qué diferencia hay entre una medida preventiva y una de fin de tubería?",
+    options: ["La medida preventiva evita la formación de contaminantes mientras que la de fin de tubería minimiza la emisión de contaminantes al medio una vez formados","Las medidas preventivas se llevan implantando en la industria varias décadas mientras que las medidas de fin de tubería son algo novedoso","Ninguna de las respuestas es correcta","La medida preventiva evita la formación de contaminantes mientras que la de fin de tubería se coloca siempre al final de la instalación, justo antes de la chimenea","La medida preventiva debe considerarse como la última alternativa"],
+    correct: 0
+  },
+  {
+    id: 121,
+    text: "Con carácter general, al incrementar la altura de chimenea:",
+    options: ["Se incrementa la probabilidad de cumplir los VLE","Se reduce la tasa de emisión","Se incrementa la sobreelevación inicial del penacho","Se reduce el momento cinético de los gases vertidos","Se reducen los niveles de concentración en las inmediaciones de la planta"],
+    correct: 4
+  },
+  {
+    id: 122,
+    text: "¿Cuándo puede interesar más aplicar un método de tratamiento destructivo?",
+    options: ["Cuando se trata de compuestos orgánicos volátiles","Cuando tiene una concentración muy alta y sin mezclar con otras sustancias","Cuando el contaminante tiene valor económico","Cuando el contaminante es peligroso y de difícil aprovechamiento","Todas las respuestas son correctas"],
+    correct: 3
+  },
+  {
+    id: 123,
+    text: "Para eliminar partículas en una corriente gaseosa explosiva:",
+    options: ["Se pueden utilizar filtros de mangas o electrofiltros","Se pueden utilizar ciclones o electrofiltros","Se pueden utilizar electrofiltros o lavadores","Se pueden utilizar lavadores o filtros de mangas","Ninguna de las otras respuestas es correcta"],
+    correct: 3
+  }
+];
+
+const LETTERS = ['a','b','c','d','e'];
+
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let examQuestions = [], examIdx = 0, examAnswered = 0, examCorrect = 0, examWrong = 0, examWrongList = [];
+let practiceQueue = [], practiceDone = 0, practiceTotal = 0, practiceAnswered = false;
+
+// ═══════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goHome() { showScreen('home'); }
+
+// ═══════════════════════════════════════
+//  EXAM MODE
+// ═══════════════════════════════════════
+function startExam() {
+  examQuestions = shuffle(QUESTIONS).slice(0, 25);
+  examIdx = 0; examCorrect = 0; examWrong = 0; examWrongList = [];
+  showScreen('exam');
+  renderExamQuestion();
+}
+
+function renderExamQuestion() {
+  const q = examQuestions[examIdx];
+  const total = examQuestions.length;
+
+  document.getElementById('exam-q-num').textContent = `Pregunta ${examIdx + 1}`;
+  document.getElementById('exam-progress-label').textContent = `Pregunta ${examIdx + 1} de ${total}`;
+  document.getElementById('exam-score-label').textContent = `✅ ${examCorrect} | ❌ ${examWrong}`;
+  document.getElementById('exam-progress-fill').style.width = `${(examIdx / total) * 100}%`;
+  document.getElementById('exam-question-text').textContent = q.text;
+
+  const feedback = document.getElementById('exam-feedback');
+  feedback.className = 'feedback-box';
+  feedback.textContent = '';
+
+  const nextBtn = document.getElementById('exam-next-btn');
+  const finishBtn = document.getElementById('exam-finish-btn');
+  nextBtn.style.display = 'none';
+  finishBtn.style.display = 'none';
+
+  const optionsEl = document.getElementById('exam-options');
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="option-letter">${LETTERS[i]})</span><span>${opt}</span>`;
+    div.onclick = () => selectExamAnswer(i, div);
+    optionsEl.appendChild(div);
+  });
+}
+
+function selectExamAnswer(selected, el) {
+  const q = examQuestions[examIdx];
+  const optionsEl = document.getElementById('exam-options');
+  const opts = optionsEl.querySelectorAll('.option');
+  opts.forEach(o => { o.classList.add('disabled'); o.onclick = null; });
+
+  const feedback = document.getElementById('exam-feedback');
+  const isLast = examIdx === examQuestions.length - 1;
+
+  if (selected === q.correct) {
+    el.classList.add('correct');
+    feedback.className = 'feedback-box feedback-correct show';
+    feedback.textContent = '✅ ¡Correcto!';
+    examCorrect++;
+  } else {
+    el.classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    feedback.className = 'feedback-box feedback-wrong show';
+    feedback.textContent = `❌ Incorrecto. La respuesta correcta es: ${LETTERS[q.correct]}) ${q.options[q.correct]}`;
+    examWrong++;
+    examWrongList.push({ q, selected });
+  }
+
+  document.getElementById('exam-score-label').textContent = `✅ ${examCorrect} | ❌ ${examWrong}`;
+
+  if (isLast) {
+    document.getElementById('exam-finish-btn').style.display = 'inline-flex';
+  } else {
+    document.getElementById('exam-next-btn').style.display = 'inline-flex';
+  }
+}
+
+function examNext() {
+  examIdx++;
+  renderExamQuestion();
+}
+
+function showExamResults() {
+  const total = examQuestions.length;
+  const pct = Math.round((examCorrect / total) * 100);
+
+  const circle = document.getElementById('result-circle');
+  circle.textContent = pct + '%';
+  circle.className = 'score-circle ' + (pct >= 70 ? 'score-pass' : pct >= 50 ? 'score-mid' : 'score-fail');
+
+  document.getElementById('result-title').textContent =
+    pct >= 70 ? '🎉 ¡Buen resultado!' : pct >= 50 ? '💪 Sigue practicando' : '📚 Necesitas más repaso';
+  document.getElementById('stat-correct').textContent = examCorrect;
+  document.getElementById('stat-wrong').textContent = examWrong;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  const failedSection = document.getElementById('failed-section');
+  const failedList = document.getElementById('failed-list');
+  failedList.innerHTML = '';
+
+  if (examWrongList.length === 0) {
+    failedSection.innerHTML = '<div style="text-align:center; padding:20px; color:var(--success); font-weight:600;">✅ ¡No has fallado ninguna pregunta!</div>';
+  } else {
+    failedSection.innerHTML = '<div class="section-title">❌ Preguntas falladas</div><div class="failed-list" id="failed-list"></div>';
+    const fl = document.getElementById('failed-list');
+    examWrongList.forEach(({ q, selected }) => {
+      const div = document.createElement('div');
+      div.className = 'failed-item';
+      div.innerHTML = `
+        <h4><strong>P${q.id}.</strong> ${q.text}</h4>
+        <div style="margin-bottom:8px; padding:8px 12px; background:#fef2f2; border-radius:6px; font-size:.85rem; color:#b91c1c;">
+          Tu respuesta: ${LETTERS[selected]}) ${q.options[selected]}
+        </div>
+        <div class="correct-answer">
+          <span class="icon">✅</span>
+          <span><strong>Correcta:</strong> ${LETTERS[q.correct]}) ${q.options[q.correct]}</span>
+        </div>`;
+      fl.appendChild(div);
+    });
+  }
+
+  showScreen('results');
+}
+
+// ═══════════════════════════════════════
+//  PRACTICE MODE
+// ═══════════════════════════════════════
+function startPractice() {
+  practiceQueue = shuffle([...QUESTIONS]);
+  practiceDone = 0;
+  practiceTotal = QUESTIONS.length;
+  practiceAnswered = false;
+  showScreen('practice');
+  renderPracticeQuestion();
+}
+
+function renderPracticeQuestion() {
+  if (practiceQueue.length === 0) {
+    showScreen('practice-done');
+    return;
+  }
+
+  practiceAnswered = false;
+  const q = practiceQueue[0];
+  const remaining = practiceQueue.length;
+  const pct = Math.round((practiceDone / practiceTotal) * 100);
+
+  document.getElementById('practice-queue-badge').textContent = `En cola: ${remaining}`;
+  document.getElementById('practice-done-badge').textContent = `Superadas: ${practiceDone}`;
+  document.getElementById('practice-progress-label').textContent = `${practiceDone} de ${practiceTotal} preguntas superadas`;
+  document.getElementById('practice-pct-label').textContent = pct + '%';
+  document.getElementById('practice-progress-fill').style.width = pct + '%';
+  document.getElementById('practice-q-num').textContent = `P${q.id}`;
+  document.getElementById('practice-question-text').textContent = q.text;
+
+  const feedback = document.getElementById('practice-feedback');
+  feedback.className = 'feedback-box';
+  feedback.textContent = '';
+
+  document.getElementById('practice-next-btn').style.display = 'none';
+
+  const optionsEl = document.getElementById('practice-options');
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="option-letter">${LETTERS[i]})</span><span>${opt}</span>`;
+    div.onclick = () => selectPracticeAnswer(i, div);
+    optionsEl.appendChild(div);
+  });
+}
+
+function selectPracticeAnswer(selected, el) {
+  if (practiceAnswered) return;
+  practiceAnswered = true;
+
+  const q = practiceQueue[0];
+  const optionsEl = document.getElementById('practice-options');
+  const opts = optionsEl.querySelectorAll('.option');
+  opts.forEach(o => { o.classList.add('disabled'); o.onclick = null; });
+
+  const feedback = document.getElementById('practice-feedback');
+
+  if (selected === q.correct) {
+    el.classList.add('correct');
+    feedback.className = 'feedback-box feedback-correct show';
+    feedback.textContent = '✅ ¡Correcto! Esta pregunta queda superada.';
+    practiceQueue.shift(); // remove from queue
+    practiceDone++;
+  } else {
+    el.classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    feedback.className = 'feedback-box feedback-wrong show';
+    feedback.textContent = `❌ Incorrecto. Correcta: ${LETTERS[q.correct]}) ${q.options[q.correct]}. La pregunta vuelve a la cola.`;
+    // move to random position further in the queue
+    const removed = practiceQueue.shift();
+    const insertAt = Math.max(3, Math.floor(Math.random() * practiceQueue.length));
+    practiceQueue.splice(Math.min(insertAt, practiceQueue.length), 0, removed);
+  }
+
+  document.getElementById('practice-queue-badge').textContent = `En cola: ${practiceQueue.length}`;
+  document.getElementById('practice-done-badge').textContent = `Superadas: ${practiceDone}`;
+  document.getElementById('practice-next-btn').style.display = 'inline-flex';
+}
+
+function practiceNext() {
+  renderPracticeQuestion();
+}
+
+// ═══════════════════════════════════════
+//  SEARCH MODE
+// ═══════════════════════════════════════
+function showSearch() {
+  showScreen('search');
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+}
+
+function doSearch() {
+  const query = document.getElementById('search-input').value.trim().toLowerCase();
+  const container = document.getElementById('search-results');
+
+  if (!query) { container.innerHTML = ''; return; }
+
+  const keywords = query.split(/\s+/).filter(k => k.length > 2);
+  if (keywords.length === 0) { container.innerHTML = ''; return; }
+
+  const results = QUESTIONS.filter(q => {
+    const full = (q.text + ' ' + q.options.join(' ')).toLowerCase();
+    return keywords.some(k => full.includes(k));
+  });
+
+  if (results.length === 0) {
+    container.innerHTML = `<div class="search-no-results">🔍 No se encontraron preguntas con "<strong>${query}</strong>"</div>`;
+    return;
+  }
+
+  container.innerHTML = `<p style="color:var(--text-muted); font-size:.85rem; margin-bottom:12px;">${results.length} resultado(s) encontrado(s)</p>`;
+
+  results.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'search-result';
+    let optionsHtml = q.options.map((opt, i) => `
+      <div class="search-option ${i === q.correct ? 'is-correct' : ''}" style="margin-bottom:4px;">
+        ${i === q.correct ? '✅ ' : ''}<strong>${LETTERS[i]})</strong> ${opt}
+      </div>`).join('');
+
+    div.innerHTML = `<h4><span style="color:var(--text-muted); font-size:.8rem;">P${q.id} — </span>${q.text}</h4>${optionsHtml}`;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
